@@ -25,16 +25,22 @@ object ADcare extends App {
 
     if(!Files.exists(Paths.get("./data/jsonFormat.json"))){
       // Load the json file.
-      val jsonFile = sc.wholeTextFiles("./data/data-students.json")
+      val jsonFile = sc.textFile("./data/data-students.json")
       // read the json and format the lines to separate the line by a '\'. Return an MapPartitionRDD
-      val jsonPre = jsonFile.collect()(0)._2.replace("} ", "}\n")
-      // Write the formatted file
-      File("./data/jsonFormat.json").writeAll(jsonPre)
+      val jsonPre = jsonFile.map(line => line.replace("} ", "}\n"))
+
+      val outputPath = "./data/jsonFormat.json"
+      jsonPre.saveAsTextFile(outputPath + "-tmp")
+      import org.apache.hadoop.fs.Path
+      val fs = org.apache.hadoop.fs.FileSystem.get(spark.sparkContext.hadoopConfiguration)
+      fs.rename(new Path(outputPath + "-tmp/part-00000"), new Path(outputPath))
+      fs.delete(new Path(outputPath  + "-tmp"), true)
+
     }
     // Read the file formatted
     val jsonFile2 = spark.read.json("./data/jsonFormat.json")
     // Show some lines of the file
-    jsonFile2.show()
+    jsonFile2.show(20)
     // Select distinct values of appOrSite column
     jsonFile2.select("appOrSite").distinct().show()
     // Counting the number of each iterations
