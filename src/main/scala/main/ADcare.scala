@@ -5,6 +5,7 @@ import scala.tools.nsc.io.File
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
 import java.nio.file.{Paths, Files}
+import org.apache.spark.mllib
 
 object ADcare extends App {
 
