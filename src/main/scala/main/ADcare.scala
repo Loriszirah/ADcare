@@ -10,18 +10,7 @@ object ADcare extends App {
 
   Main()
   def Main() = {
-    // Initialization of the spark environment
-    // Enable only the log for the errors
-    Logger.getLogger("org").setLevel(Level.ERROR)
-    val conf = new SparkConf().setAppName("ADcare").setMaster("local")
-    val sc = new SparkContext(conf)
-    val sqlContext = new SQLContext(sc)
-    val spark: SparkSession =
-      SparkSession
-        .builder()
-        .appName("ADcare")
-        .config("spark.master", "local")
-        .getOrCreate()
+    val (sc, spark) = initSpark()
 
     if(!Files.exists(Paths.get("./data/jsonFormat.json"))){
       // Load the json file.
@@ -35,17 +24,32 @@ object ADcare extends App {
       val fs = org.apache.hadoop.fs.FileSystem.get(spark.sparkContext.hadoopConfiguration)
       fs.rename(new Path(outputPath + "-tmp/part-00000"), new Path(outputPath))
       fs.delete(new Path(outputPath  + "-tmp"), true)
-
     }
-    // Read the file formatted
-    val jsonFile2 = spark.read.json("./data/jsonFormat.json")
-    // Show some lines of the file
-    jsonFile2.show(20)
-    // Select distinct values of appOrSite column
-    jsonFile2.select("appOrSite").distinct().show()
-    // Counting the number of each iterations
-    jsonFile2.groupBy("appOrSite").count().show()
-    // Close the spark session
+    val data = spark.read.json("./data/jsonFormat.json")
+
+    // Operations on data
+    data.show(20)
+    data.select("appOrSite").distinct().show()
+    data.groupBy("appOrSite").count().show()
+
     sc.stop()
+  }
+
+  /**
+   Initialization of the Spark environment.
+   Return the Spark Context and spark session.
+  */
+  def initSpark() = {
+    Logger.getLogger("org").setLevel(Level.ERROR)
+    val conf = new SparkConf().setAppName("ADcare").setMaster("local")
+    val sc = new SparkContext(conf)
+    val sqlContext = new SQLContext(sc)
+    val spark: SparkSession =
+      SparkSession
+        .builder()
+        .appName("ADcare")
+        .config("spark.master", "local")
+        .getOrCreate()
+    (sc, spark)
   }
 }
