@@ -28,9 +28,8 @@ object ADcare extends App {
     val data = spark.read.json("./data/jsonFormat.json")
 
     // Operations on data
-    data.show(20)
-    data.select("appOrSite").distinct().show()
-    data.groupBy("appOrSite").count().show()
+    data.map.filter(data("label") === "true").groupBy(variable).count().show()
+
 
     sc.stop()
   }
