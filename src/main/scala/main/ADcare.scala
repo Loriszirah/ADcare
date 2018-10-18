@@ -33,9 +33,47 @@ object ADcare extends App {
     data.select("appOrSite").distinct().show()
     data.groupBy("appOrSite").count().show()
 
+    //Get list of interests
+    var interestsList = data.select("interests").distinct().head.getString(0)split(",")
+
+    //Calculate our matching with these interests
+    var indexInterests = 0
+    interestsList.foreach(int => indexInterests += checkInterest(int))
+
+    //Render choice
+    selectChoice(indexInterests)
+
     sc.stop()
   }
 
+
+  /**
+  Test if we match the interest of the user
+  TODO : Evaluate the interests
+  */
+  def checkInterest(int: String): Int={
+      int match {
+          case "IAB1" => 1
+          case "IAB2" => 2
+          case "IAB5" => -1
+          case _ => 0
+      }
+
+  }
+
+  /**
+  See if we have a small, big, or no interest to buy for this user
+  TODO : Scale the index on the interests
+  */
+  def selectChoice(index: Int){
+      if(index > 1){
+          println("High price")
+      }else if(index > 0){
+          println("Small price")
+      }else{
+          println("No buy")
+      }
+  }
   /**
    Initialization of the Spark environment.
    Return the Spark Context and spark session.
