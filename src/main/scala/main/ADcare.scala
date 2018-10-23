@@ -1,11 +1,17 @@
 package main
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql._
-import scala.tools.nsc.io.File
+import org.apache.spark.mllib
+import org.apache.spark.ml.classification.LogisticRegression
+
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
+
 import java.nio.file.{Paths, Files}
-import org.apache.spark.mllib
+
+import scala.tools.nsc.io.File
+import scala.collection.mutable.ListBuffer
+
 
 object ADcare extends App {
 
@@ -26,27 +32,64 @@ object ADcare extends App {
       fs.delete(new Path(outputPath  + "-tmp"), true)
     }
     val data = spark.read.json("./data/jsonFormat.json")
+    data.createOrReplaceTempView("user")
 
     // Operations on data
-    data.map.filter(data("label") === "true").groupBy(variable).count().show()
-
+    // data.map.filter(data("label") === "true").groupBy(variable).count().show()
 
     data.show(20)
     data.select("appOrSite").distinct().show()
     data.groupBy("appOrSite").count().show()
+    data.groupBy("label", "appOrSite").count().show()
 
-    //Get list of interests
-    var interestsList = data.select("interests").distinct().head.getString(0)split(",")
-
-    //Calculate our matching with these interests
-    var indexInterests = 0
-    interestsList.foreach(int => indexInterests += checkInterest(int))
-
-    //Render choice
-    selectChoice(indexInterests)
+    //val training = spark.read.format("libsvm").load("data/jsonFormat.json")
 
     val filterClick = data.filter(data("label") === true)
     //data.select().filter($"label" === "true")
+    val lr = new LogisticRegression()
+    .setMaxIter(10)
+    .setRegParam(0.3)
+    .setElasticNetParam(0.8)
+
+    // Fit the model
+    //val lrModel = lr.fit(data)
+
+
+    // Print the coefficients and intercept for logistic regression
+    //println(s"Coefficients: ${lrModel.coefficients} Intercept: ${lrModel.intercept}")
+
+    val filteredInterests = spark.sql("SELECT interests, count(*) FROM user WHERE label == 'true' GROUP BY interests")
+    val interests = spark.sql("SELECT interests, count(*) FROM user GROUP BY interests")
+
+    println(interests)
+
+    /**
+        Operations on data
+
+    Examples :
+        data.select("appOrSite").distinct().show()
+        data.groupBy("appOrSite").count().show()
+
+        val interestList = data.select("interests")
+        val labelsList = data.select("label")
+    */
+
+
+
+    /**
+        LEARNING > On 60% Dataset
+        TODO : Learn which preferences
+    */
+
+
+
+
+    /**
+        ESTIMATES > On 40% Dataset
+        TODO : Render confusion matrix
+    */
+
+
     sc.stop()
   }
 
