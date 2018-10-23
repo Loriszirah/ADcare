@@ -35,16 +35,14 @@ object ADcare extends App {
     data.createOrReplaceTempView("user")
 
     // Operations on data
-    data.map.filter(data("label") === "true").groupBy(variable).count().show()
-
+    // data.map.filter(data("label") === "true").groupBy(variable).count().show()
 
     data.show(20)
     data.select("appOrSite").distinct().show()
     data.groupBy("appOrSite").count().show()
-
+    data.groupBy("label", "appOrSite").count().show()
 
     //val training = spark.read.format("libsvm").load("data/jsonFormat.json")
-
 
     val filterClick = data.filter(data("label") === true)
     //data.select().filter($"label" === "true")
