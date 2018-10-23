@@ -1,11 +1,13 @@
 package main
 import org.apache.spark.sql.DataFrame
+import scala.collection.immutable.List
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
 import org.apache.spark.sql.functions.udf
 
 object DataCleaner {
 
+    // Main function used to clean the data. Returns the DataFrame cleaned.
     def discretizeTimestamp(data: DataFrame): DataFrame = {
         def discretize(hourOfTheDay: Int) : String = {
             hourOfTheDay match {
@@ -34,6 +36,37 @@ object DataCleaner {
 
     def cleanData(data: DataFrame): DataFrame = {
         data
+    }
+
+    // Clean the os (lower car, space...). If not listed, return the original one.
+    def cleanOS(data: DataFrame): DataFrame = {
+        val osList: List[List[String]] = List(
+            List("android"),
+            List("bada"),
+            List("blackberry", "black berry"),
+            List("ios", "i os"),
+            List("rim"),
+            List("symbia"),
+            List("unknown"),
+            List("windows"),
+            List("windows mobile", "windowsmobile"),
+            List("windows phone", "windowsphone", "windows phone os", "windosphoneos")
+        )
+
+        def mapOs(os: String): Option[String] = {
+            if(os == null) null
+            else {
+                val os_lower = os.toLowerCase()
+                val list = osList.filter( l => {
+                    l.contains(os_lower)
+                })
+                if(list.length > 0) Some(list(0)(0))
+                else Some(os_lower)
+            }
+        }
+
+        val udfMapOS = udf[Option[String], String](mapOs)
+        data.withColumn("os", udfMapOS(data("os")))
     }
 
 }

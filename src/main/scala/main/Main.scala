@@ -10,4 +10,5 @@ object Main extends App {
     // Your code goes here...
 
     sc.stop()
+    spark.stop()
 }

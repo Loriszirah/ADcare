@@ -1,11 +1,11 @@
 package main
+import org.apache.hadoop.fs.Path
+import org.apache.log4j.Logger
+import org.apache.log4j.Level
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql._
 import org.apache.spark.mllib
 import org.apache.spark.ml.classification.LogisticRegression
-
-import org.apache.log4j.Logger
-import org.apache.log4j.Level
 
 import java.nio.file.{Paths, Files}
 
@@ -18,6 +18,9 @@ object DataBuilder {
     def getData(): (DataFrame, SparkContext, SparkSession, SQLContext) = {
         val (sc, spark, sqlContext) = initSpark()
         if(!Files.exists(Paths.get("./data/jsonFormat.json"))){
+
+            println("===== Creating json file")
+
             // Load the json file.
             val jsonFile = sc.textFile("./data/data-students.json")
             // read the json and format the lines to separate the line by a '\'. Return an MapPartitionRDD
@@ -25,10 +28,11 @@ object DataBuilder {
 
             val outputPath = "./data/jsonFormat.json"
             jsonPre.saveAsTextFile(outputPath + "-tmp")
-            import org.apache.hadoop.fs.Path
+
             val fs = org.apache.hadoop.fs.FileSystem.get(spark.sparkContext.hadoopConfiguration)
             fs.rename(new Path(outputPath + "-tmp/part-00000"), new Path(outputPath))
             fs.delete(new Path(outputPath  + "-tmp"), true)
+            fs.close()
         }
         val data = spark.read.json("./data/jsonFormat.json")
 
