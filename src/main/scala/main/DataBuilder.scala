@@ -15,8 +15,6 @@ import scala.collection.mutable.ListBuffer
 
 object DataBuilder {
 
-    getData()
-
     def getData(): DataFrame = {
         val (sc, spark, sqlContext) = initSpark()
         if(!Files.exists(Paths.get("./data/jsonFormat.json"))){
