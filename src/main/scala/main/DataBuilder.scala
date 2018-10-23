@@ -15,27 +15,27 @@ import scala.collection.mutable.ListBuffer
 
 object DataBuilder {
 
-    def getData(): DataFrame = {
+    def getData(): (DataFrame, SparkContext, SparkSession, SQLContext) = {
         val (sc, spark, sqlContext) = initSpark()
         if(!Files.exists(Paths.get("./data/jsonFormat.json"))){
-        // Load the json file.
-        val jsonFile = sc.textFile("./data/data-students.json")
-        // read the json and format the lines to separate the line by a '\'. Return an MapPartitionRDD
-        val jsonPre = jsonFile.map(line => line.replace("} ", "}\n"))
+            // Load the json file.
+            val jsonFile = sc.textFile("./data/data-students.json")
+            // read the json and format the lines to separate the line by a '\'. Return an MapPartitionRDD
+            val jsonPre = jsonFile.map(line => line.replace("} ", "}\n"))
 
-        val outputPath = "./data/jsonFormat.json"
-        jsonPre.saveAsTextFile(outputPath + "-tmp")
-        import org.apache.hadoop.fs.Path
-        val fs = org.apache.hadoop.fs.FileSystem.get(spark.sparkContext.hadoopConfiguration)
-        fs.rename(new Path(outputPath + "-tmp/part-00000"), new Path(outputPath))
-        fs.delete(new Path(outputPath  + "-tmp"), true)
+            val outputPath = "./data/jsonFormat.json"
+            jsonPre.saveAsTextFile(outputPath + "-tmp")
+            import org.apache.hadoop.fs.Path
+            val fs = org.apache.hadoop.fs.FileSystem.get(spark.sparkContext.hadoopConfiguration)
+            fs.rename(new Path(outputPath + "-tmp/part-00000"), new Path(outputPath))
+            fs.delete(new Path(outputPath  + "-tmp"), true)
         }
         val data = spark.read.json("./data/jsonFormat.json")
 
         // Clean data
         val dataCleaned = DataCleaner.cleanData(data)
 
-        return dataCleaned
+        (dataCleaned, sc, spark, sqlContext)
     }
 
 
