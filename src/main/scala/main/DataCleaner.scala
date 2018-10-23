@@ -7,6 +7,10 @@ import org.apache.spark.sql.functions.udf
 
 object DataCleaner {
 
+    def cleanData(data: DataFrame): DataFrame = {
+        cleanOS(discretizeTimestamp(data))
+    }
+
     // Main function used to clean the data. Returns the DataFrame cleaned.
     def discretizeTimestamp(data: DataFrame): DataFrame = {
         def discretize(hourOfTheDay: Int) : String = {
@@ -21,21 +25,17 @@ object DataCleaner {
                 Integer.parseInt(new SimpleDateFormat("HH")format(new Date(timestamp*1000)))
             } catch {
                 case _ => return 0
-            } 
+            }
         }
         def mapTimestamp(timestamp: String) : Option[String]  = {
             if(timestamp == null) null
             else{
-                Some(discretize(getCurrentHour(timestamp.toLong)))  
+                Some(discretize(getCurrentHour(timestamp.toLong)))
             }
         }
         val discret = udf[Option[String], String](mapTimestamp)
-        val dataCleaned = data.withColumn("timestamp", discret(data("timestamp")))
+        val dataCleaned = data.withColumn("timestamp_disc", discret(data("timestamp")))
         dataCleaned
-    }
-
-    def cleanData(data: DataFrame): DataFrame = {
-        data
     }
 
     // Clean the os (lower car, space...). If not listed, return the original one.
@@ -68,5 +68,6 @@ object DataCleaner {
         val udfMapOS = udf[Option[String], String](mapOs)
         data.withColumn("os", udfMapOS(data("os")))
     }
+
 
 }
