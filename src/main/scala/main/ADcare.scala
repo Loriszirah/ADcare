@@ -11,8 +11,7 @@ object ADcare extends App {
 
   Main()
   def Main() = {
-    val (sc, spark) = initSpark()
-
+    val (sc, spark, sqlContext) = initSpark()
     if(!Files.exists(Paths.get("./data/jsonFormat.json"))){
       // Load the json file.
       val jsonFile = sc.textFile("./data/data-students.json")
@@ -32,6 +31,11 @@ object ADcare extends App {
     data.map.filter(data("label") === "true").groupBy(variable).count().show()
 
 
+    data.show(20)
+    data.select("appOrSite").distinct().show()
+    data.groupBy("appOrSite").count().show()
+    val filterClick = data.filter(data("label") === true)
+    //data.select().filter($"label" === "true")
     sc.stop()
   }
 
@@ -50,6 +54,6 @@ object ADcare extends App {
         .appName("ADcare")
         .config("spark.master", "local")
         .getOrCreate()
-    (sc, spark)
+    (sc, spark, sqlContext)
   }
 }
