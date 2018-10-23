@@ -54,11 +54,11 @@ object ADcare extends App {
     .setElasticNetParam(0.8)
 
     // Fit the model
-    val lrModel = lr.fit(data)
+    //val lrModel = lr.fit(data)
 
 
     // Print the coefficients and intercept for logistic regression
-    println(s"Coefficients: ${lrModel.coefficients} Intercept: ${lrModel.intercept}")
+    //println(s"Coefficients: ${lrModel.coefficients} Intercept: ${lrModel.intercept}")
 
     val filteredInterests = spark.sql("SELECT interests, count(*) FROM user WHERE label == 'true' GROUP BY interests")
     val interests = spark.sql("SELECT interests, count(*) FROM user GROUP BY interests")
