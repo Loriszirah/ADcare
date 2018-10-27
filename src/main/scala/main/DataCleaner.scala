@@ -3,21 +3,31 @@ import org.apache.spark.sql.DataFrame
 import scala.collection.immutable.List
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
-import org.apache.spark.sql.functions.udf
 
+import org.apache.spark.sql.functions._
+
+/*
+    This object aims to clean the date in the dataFrame provided.
+    It will create new columns or modify the existing ones ()
+*/
 object DataCleaner {
 
+    // Main function used to clean the data. Returns the DataFrame cleaned.
     def cleanData(data: DataFrame): DataFrame = {
-        cleanOS(discretizeTimestamp(data))
+        val result = cleanOS(discretizeTimestamp(data))
+        result
     }
 
-    // Main function used to clean the data. Returns the DataFrame cleaned.
+    /*
+        Discretize the timestamp in 3 periods : night, morning and afternoon.
+        New column name : "timestamp_disc"
+    */
     def discretizeTimestamp(data: DataFrame): DataFrame = {
         def discretize(hourOfTheDay: Int) : String = {
             hourOfTheDay match {
-                case hourOfTheDay if hourOfTheDay >= 20 || hourOfTheDay < 4 => "Night"
-                case hourOfTheDay if hourOfTheDay >= 4 && hourOfTheDay < 12  => "Morning"
-                case hourOfTheDay if hourOfTheDay >= 12 && hourOfTheDay < 20  => "Afternoon"
+                case hourOfTheDay if hourOfTheDay >= 20 || hourOfTheDay < 4 => "night"
+                case hourOfTheDay if hourOfTheDay >= 4 && hourOfTheDay < 12  => "morning"
+                case hourOfTheDay if hourOfTheDay >= 12 && hourOfTheDay < 20  => "afternoon"
             }
         }
         def getCurrentHour(timestamp: Long): Int = {
@@ -38,7 +48,10 @@ object DataCleaner {
         dataCleaned
     }
 
-    // Clean the os (lower car, space...). If not listed, return the original one.
+    /*
+        Clean the os (lower car, space...). If not listed, return the original one.
+        No new column: modify "os".
+    */
     def cleanOS(data: DataFrame): DataFrame = {
         val osList: List[List[String]] = List(
             List("android"),
@@ -68,6 +81,4 @@ object DataCleaner {
         val udfMapOS = udf[Option[String], String](mapOs)
         data.withColumn("os", udfMapOS(data("os")))
     }
-
-
 }
