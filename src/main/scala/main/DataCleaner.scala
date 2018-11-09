@@ -50,7 +50,7 @@ object DataCleaner {
 
     /*
         Clean the os (lower car, space...). If not listed, return the original one.
-        No new column: modify "os".
+        No new column: modify "os" directly.
     */
     def cleanOS(data: DataFrame): DataFrame = {
         val osList: List[List[String]] = List(
@@ -80,5 +80,29 @@ object DataCleaner {
 
         val udfMapOS = udf[Option[String], String](mapOs)
         data.withColumn("os", udfMapOS(data("os")))
+    }
+
+    /*
+        /!\ WORKING ON IT /!\
+        Each interest has one column: 1 if the user got it, else 0.
+    */
+    def cleanInterests(data: DataFrame): DataFrame = {
+        var currentDF = data.select("interests")
+        var allInterests = List[String]()         
+
+        currentDF.select("interests").foreach(row => {
+            if(row.get(0) != null) {
+                var currentInterests = row.get(0).toString().split(',')
+                currentInterests.foreach(interest => {
+                    if(!allInterests.contains(interest)){
+                        allInterests = interest :: allInterests
+                    }
+                })
+            }
+        })
+
+        println("================")
+        println(allInterests.size)
+        data
     }
 }
