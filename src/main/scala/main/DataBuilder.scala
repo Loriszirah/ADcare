@@ -15,12 +15,19 @@ import scala.collection.mutable.ListBuffer
 
 object DataBuilder {
 
-    def getData(): (DataFrame, SparkContext, SparkSession, SQLContext) = {
+    def getData(pathToDataJSON: String) : (DataFrame, SparkContext, SparkSession, SQLContext) = {
         val (sc, spark, sqlContext) = initSpark()
-        val data = spark.read.json("./data/data-students.json")
-        // Clean data
-        val dataCleaned = DataCleaner.cleanData(data)
-        (dataCleaned, sc, spark, sqlContext)
+        try {
+            val data = spark.read.json(pathToDataJSON)
+            val dataCleaned = DataCleaner.cleanData(data)
+            (dataCleaned, sc, spark, sqlContext)
+        } catch {
+            case _: org.apache.spark.sql.AnalysisException => {
+                sc.stop()
+                spark.stop()
+                throw new Exception("ERROR: path to JSON data file doesn't exist.")
+            }
+        }
     }
 
 
