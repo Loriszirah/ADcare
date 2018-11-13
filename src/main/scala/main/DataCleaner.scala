@@ -3,6 +3,7 @@ import org.apache.spark.sql.DataFrame
 import scala.collection.immutable.List
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
+import org.apache.spark.{SparkConf, SparkContext}
 import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql._
 
@@ -19,7 +20,9 @@ object DataCleaner {
 
     // Main function used to clean the data. Returns the DataFrame cleaned.
     def cleanData(data: DataFrame): DataFrame = {
-        cleanOS(discretizeTimestamp(data))
+        val res = cleanOS(discretizeTimestamp(data))
+        CSVExport.export(res, "res.csv")
+        res
     }
 
     /*
