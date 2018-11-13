@@ -11,7 +11,6 @@ import org.apache.spark.ml.classification.LogisticRegression
 import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
 import org.apache.spark.ml.feature.{VectorAssembler, StringIndexer}
-import scala.collection.mutable.ListBuffer
 
 object Main extends App{
     val (dataCleaned, sc, spark, sqlContext) = DataBuilder.getData()

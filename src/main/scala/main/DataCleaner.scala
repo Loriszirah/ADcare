@@ -3,8 +3,13 @@ import org.apache.spark.sql.DataFrame
 import scala.collection.immutable.List
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
+import scala.collection.mutable.ListBuffer
+import org.apache.spark.sql._
 
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
+import org.apache.spark.rdd.RDD
+
 
 /*
     This object aims to clean the date in the dataFrame provided.
@@ -142,5 +147,5 @@ object DataCleaner {
         case "true" => 1
         case _ => 0 
     }
-}
+
 }
