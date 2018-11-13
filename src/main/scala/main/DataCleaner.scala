@@ -14,8 +14,7 @@ object DataCleaner {
 
     // Main function used to clean the data. Returns the DataFrame cleaned.
     def cleanData(data: DataFrame): DataFrame = {
-        val result = cleanOS(discretizeTimestamp(data))
-        result
+        cleanOS(discretizeTimestamp(data))
     }
 
     /*
