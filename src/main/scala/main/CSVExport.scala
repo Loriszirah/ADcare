@@ -20,7 +20,7 @@ object CSVExport{
         val spark = SparkSession.builder().getOrCreate()    
         import spark.implicits._
         data.select("size").show()
-        data.withColumn("size", concat(lit("["), concat_ws(",",$"size"),lit("]"))).write.format("com.databricks.spark.csv").save("myFile.csv")
+        data.withColumn("size", concat(lit("["), concat_ws(",",$"size"),lit("]"))).repartition(1).write.format("com.databricks.spark.csv").save("myFile.csv")
         data.select("size").show()
         //data.write.format("com.databricks.spark.csv").save("myFile.csv")
         /**val bw = new BufferedWriter(new FileWriter(new File(outputPath)))
