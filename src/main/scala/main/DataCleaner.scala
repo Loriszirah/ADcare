@@ -104,4 +104,43 @@ object DataCleaner {
         println(allInterests.size)
         data
     }
+
+
+    // =========== RESEARCH BY HUGO FAZIO =========== //
+    /**
+        Group the different lists of interests
+        Count the number of users with these interests, and the number of users whio have clicked
+        Calculate the freqeuncy of clicks depending of the interests list
+    */
+    def interestsFrequecies(rdd:RDD[Row]): List[Row]={
+        val rowRDD = rdd.map(s => Row(s(5),label(s(6))))
+        val datasetAll = rdd.map(_(5)).countByValue()
+        val datasetTrue = rdd.filter(x => x(6) == true).map(_(5)).countByValue()
+
+        val result: ListBuffer[(String,Double)] = ListBuffer()
+
+
+        datasetAll.foreach(i => {
+            datasetTrue.foreach(j => {
+                if(i._1 != null && j._1 != null){
+                    if(i._1.equals(j._1)){
+
+                        val ratio: Double = j._2.toFloat / i._2
+                        val resToAdd = (i._1.toString, ratio)
+                        result += resToAdd
+
+                    }
+                }    
+            })
+        })
+
+
+        result.map({x => Row(x._1,x._2)}).toList  
+    }
+
+    def label(s:Any): Double = s match{
+        case "true" => 1
+        case _ => 0 
+    }
+}
 }
