@@ -86,6 +86,33 @@ object DataCleaner {
         data.withColumn("os", udfMapOS(data("os")))
     }
 
+/*
+
+    def getFirstInterest(data: DataFrame): DataFrame = {
+        def mapInterest(interest: String): Option[String] = {
+            if(interest == null) null
+            else {
+                val os_lower = os.toLowerCase()
+                val list = osList.filter( l => {
+                    l.contains(os_lower)
+                })
+                if(list.length > 0) Some(list(0)(0))
+                else Some(os_lower)
+            }
+        }
+
+        val udfMapOS = udf[Option[String], String](mapOs)
+        data.withColumn("firstInterest", udfMapOS(data("interests")))
+    }
+
+    */
+
+
+
+    // ============================================================ //
+    // =================== NOT WORKING CLEANERS =================== //
+    // ============================================================ //
+
     /*
         /!\ WORKING ON IT /!\
         Each interest has one column: 1 if the user got it, else 0.

@@ -17,28 +17,9 @@ object DataBuilder {
 
     def getData(): (DataFrame, SparkContext, SparkSession, SQLContext) = {
         val (sc, spark, sqlContext) = initSpark()
-        if(!Files.exists(Paths.get("./data/jsonFormat.json"))){
-
-            println("===== Creating json file")
-
-            // Load the json file.
-            val jsonFile = sc.textFile("./data/data-students.json")
-            // read the json and format the lines to separate the line by a '\'. Return an MapPartitionRDD
-            val jsonPre = jsonFile.map(line => line.replace("} ", "}\n"))
-
-            val outputPath = "./data/jsonFormat.json"
-            jsonPre.saveAsTextFile(outputPath + "-tmp")
-
-            val fs = org.apache.hadoop.fs.FileSystem.get(spark.sparkContext.hadoopConfiguration)
-            fs.rename(new Path(outputPath + "-tmp/part-00000"), new Path(outputPath))
-            fs.delete(new Path(outputPath  + "-tmp"), true)
-            fs.close()
-        }
-        val data = spark.read.json("./data/jsonFormat.json")
-
+        val data = spark.read.json("./data/data-students.json")
         // Clean data
         val dataCleaned = DataCleaner.cleanData(data)
-
         (dataCleaned, sc, spark, sqlContext)
     }
 
