@@ -21,7 +21,7 @@ object DataCleaner {
     // Main function used to clean the data. Returns the DataFrame cleaned.
     def cleanData(data: DataFrame): DataFrame = {
         val res = cleanOS(discretizeTimestamp(data))
-        CSVExport.export(res, "res.csv")
+        //CSVExport.export(res, "res.csv")
         res
     }
 
