@@ -21,8 +21,8 @@ object DataCleaner {
     // Main function used to clean the data. Returns the DataFrame cleaned.
     def cleanData(data: DataFrame): DataFrame = {
         val res = cleanOS(discretizeTimestamp(data))
+        defaultValues(res)
         //CSVExport.export(res, "res.csv")
-        res
     }
 
     /*
@@ -87,6 +87,18 @@ object DataCleaner {
 
         val udfMapOS = udf[Option[String], String](mapOs)
         data.withColumn("os", udfMapOS(data("os")))
+    }
+
+  /*
+  Adding the default value "noColumn" to each column of the given dataframe
+   */
+    def defaultValues(data: DataFrame): DataFrame = {
+      val columns = data.columns
+      var defaultData = data
+      columns.foreach(column => {
+        defaultData = defaultData.na.fill("no" + column.charAt(0).toUpper + column.slice(1, column.length), Seq(column))
+      })
+      defaultData
     }
 
 /*
