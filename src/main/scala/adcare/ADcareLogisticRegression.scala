@@ -50,18 +50,18 @@ object ADcareLogisticRegression {
         val evaluator = new BinaryClassificationEvaluator()
             .setMetricName("areaUnderROC")
             .setRawPredictionCol("rawPrediction")
-                .setLabelCol("label")
+            .setLabelCol("label")
 
         val eval = evaluator.evaluate(prediction)
         println("Test set areaunderROC/accuracy = " + eval)
 
-        prediction.withColumn("Label", prediction("prediction"))select("user","Label")
+        prediction.withColumn("Label", prediction("prediction"))
     }
 
     /*
         Build a model and save it with the name "linear-regression-model".
     */
-    def trainLogisticRegression(dfTrain: DataFrame, indexerPipeline: Pipeline): Unit = {
+    def train(dfTrain: DataFrame, indexerPipeline: Pipeline): Unit = {
         val lr = new LogisticRegression().setMaxIter(logisticMaxIter)
             .setLabelCol("label")
             .setFeaturesCol("features")

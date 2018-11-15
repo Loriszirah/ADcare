@@ -22,7 +22,7 @@ object ADcareRandomForest {
     def randomForest(
         indexerPipeline: Pipeline, data: DataFrame, sc: SparkContext, 
         spark: SparkSession, sqlContext: SQLContext
-    ): Unit = {         
+    ): DataFrame = {         
         println("Indexing the data to predict...")
         val indexedDataPredict = indexerPipeline.fit(data).transform(data)
 
@@ -30,17 +30,17 @@ object ADcareRandomForest {
         val loadedModel: PipelineModel = PipelineModel.read.load("random-forest-model")
 
         println("Predicting...")
-        val predictions = loadedModel.transform(indexedDataPredict)
+        val prediction = loadedModel.transform(indexedDataPredict)
         val evaluator2 = new MulticlassClassificationEvaluator()
         .setLabelCol("label")
         .setPredictionCol("prediction")
         .setMetricName("accuracy")
-        val accuracy = evaluator2.evaluate(predictions)
+        val accuracy = evaluator2.evaluate(prediction)
         println(s"Test Error = ${(1.0 - accuracy)}")
 
         val rfModel = loadedModel.stages(0).asInstanceOf[RandomForestClassificationModel]
         println(s"Learned classification forest model:\n ${rfModel.toDebugString}")
-        val predictionValues = predictions.select ("label", "prediction", "rawPrediction")
+        val predictionValues = prediction.select ("label", "prediction", "rawPrediction")
 
         import spark.implicits._
         val truep = predictionValues.filter($"prediction" === 1.0).filter($"label" === $"prediction").count
@@ -60,14 +60,16 @@ object ADcareRandomForest {
         .setRawPredictionCol("rawPrediction")
         .setLabelCol("label")
 
-        val eval = evaluator.evaluate(predictions)
-        println("Test set areaunderROC/accuracy = " + eval)        
+        val eval = evaluator.evaluate(prediction)
+        println("Test set areaunderROC/accuracy = " + eval)  
+
+        prediction.withColumn("Label", prediction("prediction"))      
     }
 
     /*
         Build a model and save it with the name "random-forest-model".
     */
-    def trainRandomForest(dfTrain: DataFrame, indexerPipeline: Pipeline) = {
+    def train(dfTrain: DataFrame, indexerPipeline: Pipeline) = {
         val rf = new RandomForestClassifier()
             .setLabelCol("label")
             .setFeaturesCol("features")
