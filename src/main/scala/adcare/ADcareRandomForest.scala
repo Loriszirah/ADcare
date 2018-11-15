@@ -14,6 +14,16 @@ import org.apache.spark.sql.functions.udf
 
 object ADcareRandomForest {
 
+    def time[R](block: => R): R = {
+        println("Starting timer")
+        val t0 = System.nanoTime()
+        val result = block    // call-by-name
+        val t1 = System.nanoTime()
+        println("========")
+        println("Elapsed time: " + (t1 - t0) / 1000000 + "ms")
+        result
+    }
+
     val logisticMaxIter = 100000
 
     // ===================================================== //
@@ -30,40 +40,43 @@ object ADcareRandomForest {
         val loadedModel: PipelineModel = PipelineModel.read.load("random-forest-model")
 
         println("Predicting...")
-        val prediction = loadedModel.transform(indexedDataPredict)
-        val evaluator2 = new MulticlassClassificationEvaluator()
-        .setLabelCol("label")
-        .setPredictionCol("prediction")
-        .setMetricName("accuracy")
-        val accuracy = evaluator2.evaluate(prediction)
-        println(s"Test Error = ${(1.0 - accuracy)}")
 
-        val rfModel = loadedModel.stages(0).asInstanceOf[RandomForestClassificationModel]
-        println(s"Learned classification forest model:\n ${rfModel.toDebugString}")
-        val predictionValues = prediction.select ("label", "prediction", "rawPrediction")
+        time {
+            val prediction = loadedModel.transform(indexedDataPredict)
+            val evaluator2 = new MulticlassClassificationEvaluator()
+            .setLabelCol("label")
+            .setPredictionCol("prediction")
+            .setMetricName("accuracy")
+            val accuracy = evaluator2.evaluate(prediction)
+            println(s"Test Error = ${(1.0 - accuracy)}")
 
-        import spark.implicits._
-        val truep = predictionValues.filter($"prediction" === 1.0).filter($"label" === $"prediction").count
-        val truen = predictionValues.filter($"prediction" === 0.0).filter($"label" === $"prediction").count
-        val falseN = predictionValues.filter($"prediction" === 0.0).filter(!($"label" === $"prediction")).count
-        val falseP = predictionValues.filter($"prediction" === 1.0).filter(!($"label" === $"prediction")).count
+            val rfModel = loadedModel.stages(0).asInstanceOf[RandomForestClassificationModel]
+            println(s"Learned classification forest model:\n ${rfModel.toDebugString}")
+            val predictionValues = prediction.select ("label", "prediction", "rawPrediction")
 
-        val recall = truep / (truep + falseN).toDouble
-        val precision = truep / (truep + falseP).toDouble
-        println(s"TP = $truep, TN = $truen")
-        println(s"FN = $falseN, FP = $falseP")
-        println(s"recall = $recall")
-        println(s"precision = $precision")
+            import spark.implicits._
+            val truep = predictionValues.filter($"prediction" === 1.0).filter($"label" === $"prediction").count
+            val truen = predictionValues.filter($"prediction" === 0.0).filter($"label" === $"prediction").count
+            val falseN = predictionValues.filter($"prediction" === 0.0).filter(!($"label" === $"prediction")).count
+            val falseP = predictionValues.filter($"prediction" === 1.0).filter(!($"label" === $"prediction")).count
 
-        val evaluator = new BinaryClassificationEvaluator()
-        .setMetricName("areaUnderROC")
-        .setRawPredictionCol("rawPrediction")
-        .setLabelCol("label")
+            val recall = truep / (truep + falseN).toDouble
+            val precision = truep / (truep + falseP).toDouble
+            println(s"TP = $truep, TN = $truen")
+            println(s"FN = $falseN, FP = $falseP")
+            println(s"recall = $recall")
+            println(s"precision = $precision")
 
-        val eval = evaluator.evaluate(prediction)
-        println("Test set areaunderROC/accuracy = " + eval)  
+            val evaluator = new BinaryClassificationEvaluator()
+            .setMetricName("areaUnderROC")
+            .setRawPredictionCol("rawPrediction")
+            .setLabelCol("label")
 
-        prediction.withColumn("Label", prediction("prediction"))      
+            val eval = evaluator.evaluate(prediction)
+            println("Test set areaunderROC/accuracy = " + eval)  
+
+            prediction.withColumn("Label", prediction("prediction"))  
+        }    
     }
 
     /*
