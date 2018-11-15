@@ -30,6 +30,11 @@ equivalent to `sbt "run ./data/data-students.json randomForest predict"`. This w
  *model* : logisticRegression or randomForest
  
  *task* : predict or train
+ 
+ 
+### Issue
+
+If you can't load a model because of a model checksum issue (we encountered this issue some times on Windows), delete the model generated and re-train the algorithms to regenerate usable models.
 
 ## Authors
 
