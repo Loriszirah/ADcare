@@ -21,9 +21,6 @@ object CSVExport {
         val spark = SparkSession.builder().getOrCreate()    
         import spark.implicits._
 
-        val format = new java.text.SimpleDateFormat("dd-MM-yyyy_HH-mm")
-        val date = format.format(new java.util.Date())
-
-        data.coalesce(1).write.format("com.databricks.spark.csv").save("results/" + outputPath + date.toString())
+        data.coalesce(1).write.format("com.databricks.spark.csv").save(outputPath)
     }
 }
