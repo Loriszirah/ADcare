@@ -21,7 +21,7 @@ The ADcare program can be use in a various ways. You can run `sbt "run help"` to
 
 `sbt run`
 
-equivalent to `sbt "run ./data/data-students.json logisticRegression predict"`. This will predict the ad click for each row of data, according to the information in the file *./data/data-students.json* using the logisticRegression algorithm.
+equivalent to `sbt "run ./data/data-students.json randomForest predict"`. This will predict the ad click for each row of data, according to the information in the file *./data/data-students.json* using the random forest algorithm.
 
 **Usage:**
 
