@@ -64,4 +64,10 @@ object DataIndexer {
       .setOutputCol ("mediaIndex")
   }
 
+  def bidfloodIndexer = {
+    new StringIndexer()
+      .setInputCol ("bidfloor")
+      .setOutputCol ("bidfloorIndex")
+  }
+
 }

@@ -20,8 +20,17 @@ object DataCleaner {
 
     // Main function used to clean the data. Returns the DataFrame cleaned.
     def cleanData(data: DataFrame): DataFrame = {
-        val res = cleanOS(discretizeTimestamp(data))
-        defaultValues(res)
+      // Creation of the udf for converting boolean to integer
+      def bool2int(b:Boolean) = if (b) 1 else 0
+        val booltoInt = udf(bool2int _)
+
+        var res = cleanOS(discretizeTimestamp(data))
+        res = bidFloorDivider(res)
+        res = res.withColumn("size", res("size").cast(StringType))
+        .withColumn("label", booltoInt(res("label")))
+        res = defaultValues(res)
+
+        res
         //CSVExport.export(res, "res.csv")
     }
 
@@ -101,6 +110,21 @@ object DataCleaner {
       defaultData
     }
 
+  def bidFloorDivider(data: DataFrame) = {
+    val quartiles = data.stat.approxQuantile("bidfloor", Array(0.25,0.5,0.75), 0.0)
+
+    def quartileDivider(b:Double) = {
+      if(b<quartiles(0)) "low"
+      else if(b>=quartiles(0) && b < quartiles(1)) "medium"
+      else if(b>=quartiles(1) && b<quartiles(2)) "high"
+      else if(b>=quartiles(2)) "very high"
+      else "undefined"
+    }
+
+    val doubleToQuartile = udf(quartileDivider _)
+    data.withColumn("bidfloor", doubleToQuartile(data("bidfloor")));
+  }
+
 /*
 
     def getFirstInterest(data: DataFrame): DataFrame = {
@@ -134,7 +158,7 @@ object DataCleaner {
     */
     def cleanInterests(data: DataFrame): DataFrame = {
         var currentDF = data.select("interests")
-        var allInterests = List[String]()         
+        var allInterests = List[String]()
 
         currentDF.select("interests").foreach(row => {
             if(row.get(0) != null) {
@@ -177,17 +201,17 @@ object DataCleaner {
                         result += resToAdd
 
                     }
-                }    
+                }
             })
         })
 
 
-        result.map({x => Row(x._1,x._2)}).toList  
+        result.map({x => Row(x._1,x._2)}).toList
     }
 
     def label(s:Any): Double = s match{
         case "true" => 1
-        case _ => 0 
+        case _ => 0
     }
 
 }
