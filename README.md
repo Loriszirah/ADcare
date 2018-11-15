@@ -1,6 +1,7 @@
 # ADcare
 
 Web Intelligence project - IG5 2018/2019 Polytech Montpellier
+
 Analyse of data about internet users and prediction models of his possibility to click on our ad.
 
 ## Getting Started
@@ -14,9 +15,20 @@ This project runs thanks to the Scala interactive build tool **sbt**:
 
 ### Launching
 The ADcare program can be use in a various ways. You cna run `sbt "run help"` to get all the information below. 
+
 **Main usage:**
+
 `sbt run`
+
 equivalent to `sbt "run .data/data-students.json logisticRegression predict"`. This will be predict the ad click according to the information in the file *./data/data-students.json* using the logisticRegression algorithm.
+
+**Usage:**
+
+ `sbt "run path/to/data.json [model] [task]"`
+ 
+ *model* : logisticRegression or randomForest
+ 
+ *task* : predict or train
 
 
 ## Authors
