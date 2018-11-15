@@ -14,8 +14,6 @@ import org.apache.spark.sql.functions.udf
 
 object ADcareRandomForest {
 
-    val logisticMaxIter = 100000
-
     // ===================================================== //
     // =================== RANDOM FOREST =================== //
     // ===================================================== //

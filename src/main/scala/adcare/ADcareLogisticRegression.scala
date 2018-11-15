@@ -14,7 +14,7 @@ import org.apache.spark.sql.functions.udf
 
 object ADcareLogisticRegression {
 
-    val logisticMaxIter = 100000
+    val logisticMaxIter = 10
 
     // =========================================================== //
     // =================== LOGISTIC REGRESSION =================== //
@@ -70,8 +70,6 @@ object ADcareLogisticRegression {
         println("Indexing the training data...")
         val indexedDataTrain = indexerPipeline.fit(dfTrain).transform(dfTrain)
         val balancedDatasetTrain = balanceDataset(indexedDataTrain)
-        balancedDatasetTrain.show(100)
-        balancedDatasetTrain.printSchema()
         val pip2 = new Pipeline().setStages(Array(lr))
         println("Starting the training of the model...")
         val lrModel: PipelineModel = pip2.fit(balancedDatasetTrain)

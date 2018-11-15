@@ -69,7 +69,7 @@ object DataIndexer {
       .setOutputCol ("mediaIndex")
   }
 
-  def bidfloodIndexer = {
+  def bidfloorIndexer = {
     new StringIndexer()
       .setInputCol ("bidfloor")
       .setOutputCol ("bidfloorIndex")
@@ -94,8 +94,6 @@ object DataIndexer {
   }
 
   def preProcessing(data: DataFrame, sc: SparkContext, spark: SparkSession, sqlContext: SQLContext) = {
-        // Selection of the columns and application of the udf to the label column
-        val preProcessedData = data
 
         // Recuperation of the string indexers
         val networkIndexer = DataIndexer.networkIndexer;
@@ -107,19 +105,19 @@ object DataIndexer {
         val mediaIndexer = DataIndexer.mediaIndexer;
         val cityIndexer = DataIndexer.cityIndexer;
         val typeIndexer = DataIndexer.typeIndexer;
-        val bidfloorIndexer = DataIndexer.bidfloodIndexer;
+        val bidfloorIndexer = DataIndexer.bidfloorIndexer;
         val sizeIndexer = DataIndexer.sizeIndexer;
         val interestsIndexer = DataIndexer.interestsIndexer;
 
         // Creation of the vector assembler grouping all the features
         val assemblerEncoder = new VectorAssembler()
             .setInputCols(Array("appOrSiteIndex", "osIndex", "exchangeIndex",
-            "mediaIndex", "typeIndex", "sizeIndex", "bidfloorIndex"))
+              "mediaIndex", "typeIndex", "sizeIndex"))
             .setOutputCol("features")
 
-        val indexerPipeline = new Pipeline().setStages(Array(appOrSiteIndexer, osIndexer,
-        exchangeIndexer, mediaIndexer, typeIndexer, sizeIndexer, publisherIndexer, bidfloorIndexer, interestsIndexer,
-        assemblerEncoder))
+        val indexerPipeline = new Pipeline().setStages(Array(appOrSiteIndexer,
+          osIndexer, exchangeIndexer, mediaIndexer, typeIndexer,
+          sizeIndexer, assemblerEncoder))
 
         indexerPipeline
     }
