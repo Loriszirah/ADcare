@@ -1,4 +1,4 @@
-package main
+package helpers
 import org.apache.hadoop.fs.Path
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
@@ -22,10 +22,10 @@ object DataBuilder {
             val dataCleaned = DataCleaner.cleanData(data)
             (dataCleaned, sc, spark, sqlContext)
         } catch {
-            case _: org.apache.spark.sql.AnalysisException => {
+            case e : Throwable => {
                 sc.stop()
                 spark.stop()
-                throw new Exception("ERROR: path to JSON data file doesn't exist.")
+                throw e
             }
         }
     }

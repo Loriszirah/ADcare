@@ -1,4 +1,4 @@
-package main
+package helpers
 import org.apache.spark.sql.DataFrame
 import java.io._
 import java.util.Date
