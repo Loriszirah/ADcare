@@ -10,7 +10,7 @@ import org.apache.spark.sql.Row
 object Main extends App {
 
     var pathToDataJSON = "./data/data-students.json"
-    var model = "logisticRegression"
+    var model = "randomForest"
     var task = "predict"
     var usage = "Usage: path/to/data.json [model] [task]"
     var defaultValues = "Default values (if called with no argument): " + pathToDataJSON + "  " + model + "  " + task
@@ -31,7 +31,6 @@ object Main extends App {
         model = args(1)
         task = args(2)
     }
-
 
 
     val (dataCleaned, sc, spark, sqlContext) = DataBuilder.getData(pathToDataJSON)
