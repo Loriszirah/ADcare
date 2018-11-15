@@ -31,6 +31,9 @@ object Main extends App {
         model = args(1)
         task = args(2)
     }
+
+
+
     val (dataCleaned, sc, spark, sqlContext) = DataBuilder.getData(pathToDataJSON)
     val myRDD : RDD[Row] = dataCleaned.rdd
 
@@ -44,7 +47,7 @@ object Main extends App {
             CSVExport.export(resLogistic, "res-logistic-regression")            
         }
         if(task == "train") {
-            ADcareRandomForest.train(dataCleaned, indexerPipeline)
+            ADcareLogisticRegression.train(dataCleaned, indexerPipeline)
         }
     }
     if(model == "randomForest") {
