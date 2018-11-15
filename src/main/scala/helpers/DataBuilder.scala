@@ -19,7 +19,8 @@ object DataBuilder {
         val (sc, spark, sqlContext) = initSpark()
         try {
             val data = spark.read.json(pathToDataJSON)
-            val dataCleaned = DataCleaner.cleanData(data)
+            
+            val dataCleaned = DataCleaner.cleanData(data.limit(1000))
             (dataCleaned, sc, spark, sqlContext)
         } catch {
             case e : Throwable => {

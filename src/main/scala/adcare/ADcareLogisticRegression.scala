@@ -14,6 +14,15 @@ import org.apache.spark.sql.functions.udf
 
 object ADcareLogisticRegression {
 
+    def time[R](block: => R): R = {
+        val t0 = System.nanoTime()
+        val result = block    // call-by-name
+        val t1 = System.nanoTime()
+        println("Elapsed time: " + (t1 - t0) + "ns")
+        result
+    }
+
+
     val logisticMaxIter = 100000
 
     // =========================================================== //
@@ -31,31 +40,33 @@ object ADcareLogisticRegression {
         val loadedModel: PipelineModel = PipelineModel.read.load("linear-regression-model")
         
         println("Predicting...")
-        val prediction = loadedModel.transform(indexedDataPredict)
-        val predictionValues = prediction.select ("label", "prediction", "rawPrediction")
+        time {
+            val prediction = loadedModel.transform(indexedDataPredict)
+            val predictionValues = prediction.select ("label", "prediction", "rawPrediction")
 
-        import spark.implicits._
-        val truep = predictionValues.filter($"prediction" === 1.0).filter($"label" === $"prediction").count
-        val truen = predictionValues.filter($"prediction" === 0.0).filter($"label" === $"prediction").count
-        val falseN = predictionValues.filter($"prediction" === 0.0).filter(!($"label" === $"prediction")).count
-        val falseP = predictionValues.filter($"prediction" === 1.0).filter(!($"label" === $"prediction")).count
+            import spark.implicits._
+            val truep = predictionValues.filter($"prediction" === 1.0).filter($"label" === $"prediction").count
+            val truen = predictionValues.filter($"prediction" === 0.0).filter($"label" === $"prediction").count
+            val falseN = predictionValues.filter($"prediction" === 0.0).filter(!($"label" === $"prediction")).count
+            val falseP = predictionValues.filter($"prediction" === 1.0).filter(!($"label" === $"prediction")).count
 
-        val recall = truep / (truep + falseN).toDouble
-        val precision = truep / (truep + falseP).toDouble
-        println(s"TP = $truep, TN = $truen")
-        println(s"FN = $falseN, FP = $falseP")
-        println(s"recall = $recall")
-        println(s"precision = $precision")
+            val recall = truep / (truep + falseN).toDouble
+            val precision = truep / (truep + falseP).toDouble
+            println(s"TP = $truep, TN = $truen")
+            println(s"FN = $falseN, FP = $falseP")
+            println(s"recall = $recall")
+            println(s"precision = $precision")
 
-        val evaluator = new BinaryClassificationEvaluator()
-            .setMetricName("areaUnderROC")
-            .setRawPredictionCol("rawPrediction")
-            .setLabelCol("label")
+            val evaluator = new BinaryClassificationEvaluator()
+                .setMetricName("areaUnderROC")
+                .setRawPredictionCol("rawPrediction")
+                .setLabelCol("label")
 
-        val eval = evaluator.evaluate(prediction)
-        println("Test set areaunderROC/accuracy = " + eval)
+            val eval = evaluator.evaluate(prediction)
+            println("Test set areaunderROC/accuracy = " + eval)
 
-        prediction.withColumn("Label", prediction("prediction"))
+            prediction.withColumn("Label", prediction("prediction"))
+        }
     }
 
     /*
