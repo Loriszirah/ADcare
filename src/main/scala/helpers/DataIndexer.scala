@@ -111,13 +111,13 @@ object DataIndexer {
 
         // Creation of the vector assembler grouping all the features
         val assemblerEncoder = new VectorAssembler()
-            .setInputCols(Array("appOrSiteIndex", "osIndex", "exchangeIndex",
-              "mediaIndex", "typeIndex", "sizeIndex"))
-            .setOutputCol("features")
+          .setInputCols(Array("appOrSiteIndex", "osIndex", "exchangeIndex",
+            "mediaIndex", "typeIndex", "sizeIndex", "bidfloorIndex"))
+          .setOutputCol("features")
 
-        val indexerPipeline = new Pipeline().setStages(Array(appOrSiteIndexer,
-          osIndexer, exchangeIndexer, mediaIndexer, typeIndexer,
-          sizeIndexer, assemblerEncoder))
+      val indexerPipeline = new Pipeline().setStages(Array(appOrSiteIndexer, osIndexer,
+      exchangeIndexer, mediaIndexer, typeIndexer, sizeIndexer, publisherIndexer, bidfloorIndexer, interestsIndexer,
+      assemblerEncoder))
 
         indexerPipeline
     }
