@@ -1,6 +1,8 @@
 package main
 import org.apache.spark.sql.DataFrame
 import java.io._
+import java.util.Date
+
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.SparkConf
@@ -19,10 +21,10 @@ object CSVExport{
     def export(data: DataFrame, outputPath: String) = {
         val spark = SparkSession.builder().getOrCreate()    
         import spark.implicits._
-        data.select("size").show()
+        /*data.select("size").show()
         data.withColumn("size", concat(lit("["), concat_ws(",",$"size"),lit("]"))).repartition(1).write.format("com.databricks.spark.csv").save("myFile.csv")
-        data.select("size").show()
-        //data.write.format("com.databricks.spark.csv").save("myFile.csv")
+        data.select("size").show()*/
+        data.coalesce(1).write.format("com.databricks.spark.csv").save("myFile.csv_"+ new Date())
         /**val bw = new BufferedWriter(new FileWriter(new File(outputPath)))
         var string = new StringBuilder
         string ++= data.columns.toSeq.map(element => "\"" + element + "\"").mkString(",") + "\n"

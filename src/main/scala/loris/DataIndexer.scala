@@ -1,6 +1,6 @@
 package loris
 
-import org.apache.spark.ml.feature.StringIndexer
+import org.apache.spark.ml.feature.{OneHotEncoder, OneHotEncoderEstimator, StringIndexer}
 
 object DataIndexer {
 
@@ -70,4 +70,21 @@ object DataIndexer {
       .setOutputCol ("bidfloorIndex")
   }
 
+  def interestsIndexer = {
+    new StringIndexer()
+      .setInputCol ("interests")
+      .setOutputCol ("interestsIndex")
+  }
+
+  def interestsEncoder = {
+    new OneHotEncoder()
+      .setInputCol("interestsIndex")
+      .setOutputCol("interestsEncoder")
+  }
+
+  def bidfloorEncoder = {
+    new StringIndexer()
+      .setInputCol("bidfloorIndex")
+      .setOutputCol("bidfloorEncoder")
+  }
 }

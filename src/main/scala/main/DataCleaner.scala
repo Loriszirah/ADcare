@@ -1,12 +1,16 @@
 package main
 import org.apache.spark.sql.DataFrame
+
 import scala.collection.immutable.List
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
+
+import org.apache.avro.generic.GenericData
 import org.apache.spark.{SparkConf, SparkContext}
+
 import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql._
-
+import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.rdd.RDD
@@ -22,16 +26,17 @@ object DataCleaner {
     def cleanData(data: DataFrame): DataFrame = {
       // Creation of the udf for converting boolean to integer
       def bool2int(b:Boolean) = if (b) 1 else 0
-        val booltoInt = udf(bool2int _)
+      val a = udf(bool2int _)
 
-        var res = cleanOS(discretizeTimestamp(data))
-        res = bidFloorDivider(res)
-        res = res.withColumn("size", res("size").cast(StringType))
-        .withColumn("label", booltoInt(res("label")))
-        res = defaultValues(res)
+      var res = cleanOS(discretizeTimestamp(data))
+      res = bidFloorDivider(res)
+      res = res
+        .withColumn("size", res("size").cast(StringType))
+        .withColumn("label", a(res("label")))
+          .withColumn("interests", res("interests").cast(StringType))
+      res = defaultValues(res)
 
-        res
-        //CSVExport.export(res, "res.csv")
+      res
     }
 
     /*
