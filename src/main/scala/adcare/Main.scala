@@ -55,7 +55,7 @@ object Main extends App {
             CSVExport.export(resRandomForest, "res-random-forest")
         }
         if(task == "train") {
-            ADcareLogisticRegression.train(dataCleaned, indexerPipeline)
+            ADcareRandomForest.train(dataCleaned, indexerPipeline)
         }
     }
     sc.stop()
